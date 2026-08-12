@@ -12,6 +12,8 @@ MoveGenerator::MoveGenerator()
     int dx_king[8] = {1, 1, 1, 0, 0, -1, -1, -1};
     int dy_king[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
     generateLeaperMoves(kingAttacks, dx_king, dy_king);
+
+    initPawnAttacks();
 }
 
 void MoveGenerator::generateLeaperMoves(u64 table[64], const int dx[8], const int dy[8])
@@ -35,6 +37,47 @@ void MoveGenerator::generateLeaperMoves(u64 table[64], const int dx[8], const in
             }
         }
     }
+}
+
+void MoveGenerator::initPawnAttacks() 
+{
+    for(int square{}; square < 64; ++square) 
+    {
+        pawnAttacks[0][square] = 0; 
+        pawnAttacks[1][square] = 0; 
+
+        int row{square/8};
+        int col{square % 8};
+
+        //white pawns only move up
+        if(row < 7) 
+        {
+            //left attack
+            if(col > 0) 
+                set_bit(pawnAttacks[0][square], (row + 1) * 8 + (col - 1));
+
+            //right attack
+            if(col < 7) 
+                set_bit(pawnAttacks[0][square], (row + 1) * 8 + (col + 1));
+        }
+
+        //black pawns only move down
+        if(row > 0) 
+        {
+            //left attack
+            if(col > 0) 
+                set_bit(pawnAttacks[1][square], (row - 1) * 8 + (col - 1));
+
+            //right attack
+            if(col < 7) 
+                set_bit(pawnAttacks[1][square], (row - 1) * 8 + (col + 1));
+        }
+    }
+}
+
+u64 MoveGenerator::getPawnAttacks(int color, int square) const 
+{
+    return pawnAttacks[color][square];
 }
 
 u64 MoveGenerator::getKnightAttacks(int square) const 

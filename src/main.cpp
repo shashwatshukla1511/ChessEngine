@@ -2,20 +2,19 @@
 #include "Board.hpp"
 #include "MoveGenerator.hpp"
 
-int main() {
+int main() 
+{
     std::cout << "Initializing Chess Engine...\n";
     
     MoveGenerator moveGen;
 
-    std::cout << "Testing Leaper Refactor...\n";
+    std::cout << "\nWhite Pawn attacks from e4 (Square 28):";
+    u64 whitePawnMask = moveGen.getPawnAttacks(0, 28);
+    printBitboard(whitePawnMask);
 
-    std::cout << "\nLegal Knight jumps from e4 (Square 28):";
-    uint64_t knightMask = moveGen.getKnightAttacks(28);
-    printBitboard(knightMask);
-
-    std::cout << "Legal King moves from e4 (Square 28):";
-    uint64_t kingMask = moveGen.getKingAttacks(28);
-    printBitboard(kingMask);
-
+    std::cout << "Black Pawn attacks from e4 (Square 28):";
+    u64 blackPawnMask = moveGen.getPawnAttacks(1, 28);
+    printBitboard(blackPawnMask);   
+    
     return 0;
 }
