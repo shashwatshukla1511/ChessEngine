@@ -14,6 +14,7 @@ MoveGenerator::MoveGenerator()
     generateLeaperMoves(kingAttacks, dx_king, dy_king);
 
     initPawnAttacks();
+    initRays();
 }
 
 void MoveGenerator::generateLeaperMoves(u64 table[64], const int dx[8], const int dy[8])
@@ -75,6 +76,35 @@ void MoveGenerator::initPawnAttacks()
     }
 }
 
+void MoveGenerator::initRays() 
+{
+    int dx[8] = {1, -1, 0, 0, 1, 1, -1, -1}; 
+    int dy[8] = {0, 0, 1, -1, 1, -1, 1, -1}; 
+
+    for(int square{}; square < 64; ++square) 
+    {
+        int row{square/8};
+        int col{square % 8};
+
+        for(int dir{}; dir < 8; ++dir) 
+        {
+            rays[dir][square] = 0;
+
+            int r{row + dx[dir]};
+            int c{col + dy[dir]};
+
+            while(r >= 0 && r <= 7 && c >= 0 && c <= 7) 
+            {
+                int targetSquare{r * 8 + c};
+                set_bit(rays[dir][square], targetSquare);
+                    
+                r += dx[dir];
+                c += dy[dir];
+            }
+        }
+    }
+}
+
 u64 MoveGenerator::getPawnAttacks(int color, int square) const 
 {
     return pawnAttacks[color][square];
@@ -88,4 +118,9 @@ u64 MoveGenerator::getKnightAttacks(int square) const
 u64 MoveGenerator::getKingAttacks(int square) const 
 {
     return kingAttacks[square];
+}
+
+u64 MoveGenerator::getRay(Direction dir, int square) const 
+{
+    return rays[dir][square];
 }
