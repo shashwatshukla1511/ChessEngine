@@ -1,25 +1,24 @@
 #include <iostream>
 #include "Board.hpp"
 #include "MoveGenerator.hpp"
+#include "Move.hpp" 
 
 int main() 
 {
-    std::cout << "Initializing Chess Engine...\n";
+    std::cout << "Testing 16-bit Move Encoding...\n\n";
     
-    MoveGenerator moveGen;
+    int startSquare = 52; 
+    int endSquare = 59;   
+    int moveFlag = PROMOTE_QUEEN_CAPTURE; 
 
-    u64 occupied = 0;
-    set_bit(occupied, 44); 
-    set_bit(occupied, 12); 
-    set_bit(occupied, 30); 
-    set_bit(occupied, 25);
-    
-    std::cout << "\nOccupied Squares (Blockers):";
-    printBitboard(occupied);
+    u16 move = encodeMove(startSquare, endSquare, moveFlag);
 
-    std::cout << "Rook Attacks from e4 (Square 28) with Blockers:";
-    u64 rookAttacks = moveGen.getRookAttacks(28, occupied);
-    printBitboard(rookAttacks);
+    std::cout << "Packed Move Integer: " << move << "\n\n";
+
+    std::cout << "--- Decoding ---\n";
+    std::cout << "Source Square: " << getSource(move) << "\n";
+    std::cout << "Target Square: " << getTarget(move) << "\n";
+    std::cout << "Move Flag: " << getFlag(move) << "\n";
 
     return 0;
 }
