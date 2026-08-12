@@ -8,12 +8,15 @@ class MoveGenerator
 {
     private:
     
-    //knightAttacks[square] returns a bitboard of all legal jumps from that square
+    //return a bitboard of all legal jumps from that square
     u64 knightAttacks[64];
-    void initKnightAttacks();
+    u64 kingAttacks[64];
+
+    void generateLeaperMoves(u64 table[64], const int rankJumps[8], const int fileJumps[8]);
 
     public:
 
-    MoveGenerator();
-    uint64_t getKnightAttacks(int square) const;
+    MoveGenerator();    
+    u64 getKnightAttacks(int square) const;
+    u64 getKingAttacks(int square) const;
 };
