@@ -27,8 +27,13 @@ class MoveGenerator
     public:
 
     MoveGenerator();    
+
     u64 getKnightAttacks(int square) const;
     u64 getKingAttacks(int square) const;
     u64 getPawnAttacks(int color, int square) const;
+    u64 getRookAttacks(int square, u64 occupied) const;
+    u64 getBishopAttacks(int square, u64 occupied) const;
+    u64 getQueenAttacks(int square, u64 occupied) const;
+    
     u64 getRay(Direction dir, int square) const;
 };

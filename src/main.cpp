@@ -2,18 +2,24 @@
 #include "Board.hpp"
 #include "MoveGenerator.hpp"
 
-int main() {
+int main() 
+{
     std::cout << "Initializing Chess Engine...\n";
     
     MoveGenerator moveGen;
 
-    std::cout << "\nNorth Ray from e4 (Square 28):";
-    u64 northRay = moveGen.getRay(NORTH, 28);
-    printBitboard(northRay);
+    u64 occupied = 0;
+    set_bit(occupied, 44); 
+    set_bit(occupied, 12); 
+    set_bit(occupied, 30); 
+    set_bit(occupied, 25);
+    
+    std::cout << "\nOccupied Squares (Blockers):";
+    printBitboard(occupied);
 
-    std::cout << "North-East Ray from e4 (Square 28):";
-    u64 northEastRay = moveGen.getRay(NORTH_EAST, 28);
-    printBitboard(northEastRay);
+    std::cout << "Rook Attacks from e4 (Square 28) with Blockers:";
+    u64 rookAttacks = moveGen.getRookAttacks(28, occupied);
+    printBitboard(rookAttacks);
 
     return 0;
 }

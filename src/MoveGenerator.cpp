@@ -105,6 +105,100 @@ void MoveGenerator::initRays()
     }
 }
 
+u64 MoveGenerator::getRookAttacks(int square, u64 occupied) const 
+{
+    u64 attacks{};
+    u64 ray{}, blockers{};
+
+    ray = rays[NORTH][square];
+    blockers = ray & occupied;
+
+    if(blockers) 
+        attacks |= (ray ^ rays[NORTH][get_lsb(blockers)]);
+
+    else 
+        attacks |= ray;
+    
+    ray = rays[EAST][square];
+    blockers = ray & occupied;
+
+    if(blockers) 
+        attacks |= (ray ^ rays[EAST][get_lsb(blockers)]);
+
+    else 
+        attacks |= ray;
+
+    ray = rays[SOUTH][square];
+    blockers = ray & occupied;
+
+    if(blockers) 
+        attacks |= (ray ^ rays[SOUTH][get_msb(blockers)]);
+    
+    else 
+        attacks |= ray;
+
+    ray = rays[WEST][square];
+    blockers = ray & occupied;
+
+    if(blockers) 
+        attacks |= (ray ^ rays[WEST][get_msb(blockers)]);
+
+    else 
+        attacks |= ray;
+
+    return attacks;
+}
+
+u64 MoveGenerator::getBishopAttacks(int square, u64 occupied) const 
+{
+    u64 attacks{};
+    u64 ray, blockers;
+
+    ray = rays[NORTH_EAST][square];
+    blockers = ray & occupied;
+
+    if(blockers) 
+        attacks |= (ray ^ rays[NORTH_EAST][get_lsb(blockers)]);
+
+    else 
+        attacks |= ray;
+
+    ray = rays[NORTH_WEST][square];
+    blockers = ray & occupied;
+
+    if(blockers) 
+        attacks |= (ray ^ rays[NORTH_WEST][get_lsb(blockers)]);
+
+    else 
+        attacks |= ray;
+
+    ray = rays[SOUTH_EAST][square];
+    blockers = ray & occupied;
+
+    if(blockers) 
+        attacks |= (ray ^ rays[SOUTH_EAST][get_msb(blockers)]);
+
+    else 
+        attacks |= ray;
+
+    ray = rays[SOUTH_WEST][square];
+    blockers = ray & occupied;
+
+    if(blockers) 
+        attacks |= (ray ^ rays[SOUTH_WEST][get_msb(blockers)]);
+
+    else 
+        attacks |= ray;
+
+    return attacks;
+}
+
+//Queen is Bishop and rook combined
+u64 MoveGenerator::getQueenAttacks(int square, u64 occupied) const 
+{
+    return getRookAttacks(square, occupied) | getBishopAttacks(square, occupied);
+}
+
 u64 MoveGenerator::getPawnAttacks(int color, int square) const 
 {
     return pawnAttacks[color][square];

@@ -20,6 +20,16 @@ inline constexpr void clear_bit(u64& bitboard, int square)
     bitboard &= ~(1ll << square);
 }
 
+inline int get_lsb(uint64_t b) 
+{
+    return (b? __builtin_ctzll(b): -1);
+}
+
+inline int get_msb(uint64_t b) 
+{
+    return (b? 63 - __builtin_clzll(b): -1);
+}
+
 inline void printBitboard(u64 bitboard) 
 {
     std::cout << "\n";
