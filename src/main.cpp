@@ -1,24 +1,16 @@
 #include <iostream>
-#include <cstdint>
+#include "Board.hpp"
+#include "MoveGenerator.hpp"
 
-using u64 = uint64_t;
-
-bool ibit(u64 board, int square)
+int main() 
 {
-    return (board & (1ull << (square)));
-}
-
-void printBoard(u64 board)
-{
-
-}   
-
-int main() {
-    std::cout << "Chess Engine Build Successful!" << std::endl;
+    std::cout << "Initializing Chess Engine...\n";
     
-    // A quick test to ensure our 64-bit integers are ready to go
-    uint64_t testBitboard = 1ULL; 
-    std::cout << "Size of bitboard: " << sizeof(testBitboard) << " bytes" << std::endl;
+    MoveGenerator moveGen;
+
+    std::cout << "Legal Knight jumps from e4 (Square 28):";
+    uint64_t knightMask{moveGen.getKnightAttacks(28)};
+    printBitboard(knightMask);  
     
     return 0;
 }

@@ -14,4 +14,4 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 endif()
 
 # Tell CMake to compile main.cpp into an executable named "ChessEngine"
-add_executable(ChessEngine src/main.cpp)
+add_executable(ChessEngine src/main.cpp src/Board.cpp src/MoveGenerator.cpp)
