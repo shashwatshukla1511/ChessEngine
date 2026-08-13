@@ -1,5 +1,6 @@
 #include "MoveGenerator.hpp"
 #include "BitUtils.hpp"
+#include "Board.hpp"
 
 using u64 = uint64_t;
 
@@ -118,13 +119,13 @@ u64 MoveGenerator::getRookAttacks(int square, u64 occupied) const
 
     else 
         attacks |= ray;
-    
+
     ray = rays[EAST][square];
     blockers = ray & occupied;
 
     if(blockers) 
         attacks |= (ray ^ rays[EAST][get_lsb(blockers)]);
-
+    
     else 
         attacks |= ray;
 
@@ -217,4 +218,109 @@ u64 MoveGenerator::getKingAttacks(int square) const
 u64 MoveGenerator::getRay(Direction dir, int square) const 
 {
     return rays[dir][square];
+}
+
+void MoveGenerator::generateMoves(const Board& board, MoveList& moveList) const 
+{
+    int side{board.getSide()};
+    int enemySide{(side == WHITE) ? BLACK : WHITE};
+
+    u64 friendlyOccupancy{board.getOccupancy(side)};
+    u64 enemyOccupancy{board.getOccupancy(enemySide)};
+    u64 globalOccupancy{board.getOccupancy(BOTH)}; 
+
+    //1.KNIGHTS
+    u64 knights{board.getPieceBitboard(side, KNIGHT)};
+
+    while(knights) 
+    {
+        int sourceSquare{get_lsb(knights)};
+        u64 attacks{getKnightAttacks(sourceSquare) & ~friendlyOccupancy};
+
+        while(attacks) 
+        {
+            int targetSquare{get_lsb(attacks)};
+            int flag{get_bit(enemyOccupancy, targetSquare) ? CAPTURE : QUIET};
+            moveList.add(encodeMove(sourceSquare, targetSquare, flag));
+            attacks &= (attacks - 1); 
+        }
+
+        knights &= (knights - 1); 
+    }
+
+    //2.KINGS
+    u64 kings{board.getPieceBitboard(side, KING)};
+    
+    while(kings) 
+    {
+        int sourceSquare{get_lsb(kings)};
+        u64 attacks{getKingAttacks(sourceSquare) & ~friendlyOccupancy};
+
+        while(attacks) 
+        {
+            int targetSquare{get_lsb(attacks)};
+            int flag{get_bit(enemyOccupancy, targetSquare) ? CAPTURE : QUIET};
+            moveList.add(encodeMove(sourceSquare, targetSquare, flag));
+            attacks &= (attacks - 1); 
+        }
+
+        kings &= (kings - 1); 
+    }
+
+    //3. BISHOPS
+    u64 bishops{board.getPieceBitboard(side, BISHOP)};
+
+    while(bishops) 
+    {
+        int sourceSquare{get_lsb(bishops)};
+        u64 attacks{getBishopAttacks(sourceSquare, globalOccupancy) & ~friendlyOccupancy};
+
+        while(attacks) 
+        {
+            int targetSquare{get_lsb(attacks)};
+            int flag{get_bit(enemyOccupancy, targetSquare) ? CAPTURE : QUIET};
+            moveList.add(encodeMove(sourceSquare, targetSquare, flag));
+            attacks &= (attacks - 1); 
+        }
+
+        bishops &= (bishops - 1); 
+    }
+
+    //4. ROOKS
+    u64 rooks{board.getPieceBitboard(side, ROOK)};
+
+    while(rooks) 
+    {
+        int sourceSquare{get_lsb(rooks)};
+        u64 attacks{getRookAttacks(sourceSquare, globalOccupancy) & ~friendlyOccupancy};
+
+        while(attacks) 
+        {
+            int targetSquare{get_lsb(attacks)};
+            int flag{get_bit(enemyOccupancy, targetSquare) ? CAPTURE : QUIET};
+            moveList.add(encodeMove(sourceSquare, targetSquare, flag));
+            attacks &= (attacks - 1); 
+        }
+
+        rooks &= (rooks - 1); 
+    }
+
+    //5. QUEENS
+    u64 queens{board.getPieceBitboard(side, QUEEN)};
+
+    while(queens) 
+    {
+        int sourceSquare{get_lsb(queens)};
+        u64 attacks{getQueenAttacks(sourceSquare, globalOccupancy) & ~friendlyOccupancy};
+
+        while(attacks) 
+        {
+            int targetSquare = get_lsb(attacks);
+            int flag{get_bit(enemyOccupancy, targetSquare) ? CAPTURE : QUIET};
+            moveList.add(encodeMove(sourceSquare, targetSquare, flag));
+            attacks &= (attacks - 1); 
+        }
+
+        queens &= (queens - 1); 
+    }
 }
