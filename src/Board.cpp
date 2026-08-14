@@ -3,7 +3,7 @@
 
 using u64 = uint64_t;
 
-Board::Board() 
+Board::Board()
 {
     for(int i{}; i < 2; ++i)
     {
@@ -12,6 +12,15 @@ Board::Board()
             bitboards[i][j] = 0;
         }
     }
+
+    occupancies[WHITE] = 0;
+    occupancies[BLACK] = 0;
+    occupancies[BOTH]  = 0;
+
+    turn = WHITE;
+
+    enPassantSquare = -1;
+    castlingRights = WK | WQ | BK | BQ;
 }
 
 void Board::setPiece(int color, int piece, int square)

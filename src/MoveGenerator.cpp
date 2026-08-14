@@ -229,6 +229,160 @@ void MoveGenerator::generateMoves(const Board& board, MoveList& moveList) const
     u64 enemyOccupancy{board.getOccupancy(enemySide)};
     u64 globalOccupancy{board.getOccupancy(BOTH)}; 
 
+    // --- PAWNS ---
+    if(side == WHITE) 
+    {
+        u64 pawns{board.getPieceBitboard(WHITE, PAWN)};
+        
+        // 1. Single Pushes (Shift Up 8 squares, must be empty)
+        u64 singlePushes{(pawns << 8) & ~globalOccupancy};
+        u64 pushes{singlePushes};
+        
+        while(pushes) 
+        {
+            int targetSquare{get_lsb(pushes)};
+            int sourceSquare{targetSquare - 8};
+            
+            //If it reaches Rank 8 (squares 56-63), it's a promotion
+            if(targetSquare >= 56) 
+            {
+                moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_QUEEN));
+                moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_ROOK));
+                moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_BISHOP));
+                moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_KNIGHT));
+            } 
+
+            else 
+            {
+                moveList.add(encodeMove(sourceSquare, targetSquare, QUIET));
+            }
+
+            pushes &= (pushes - 1);
+        }
+        
+        // 2. Double Pushes 
+        // Single pushes onto Row 3 (0x0000000000FF0000ULL), shifted up 8 MORE squares, must be empty
+        u64 doublePushes{((singlePushes & 0x0000000000FF0000ULL) << 8) & ~globalOccupancy};
+        
+        while(doublePushes) 
+        {
+            int targetSquare{get_lsb(doublePushes)};
+            int sourceSquare{targetSquare - 16};
+            moveList.add(encodeMove(sourceSquare, targetSquare, DOUBLE_PUSH));
+            doublePushes &= (doublePushes - 1);
+        }
+        
+        // 3. (Diagonal captures)
+
+        u64 validTargets{enemyOccupancy};
+        u64 attackers{pawns};
+        while(attackers) 
+        {
+            int sourceSquare{get_lsb(attackers)};
+            u64 attacks{getPawnAttacks(WHITE, sourceSquare) & validTargets};
+            
+            while(attacks) 
+            {
+                int targetSquare{get_lsb(attacks)};
+                
+                if(targetSquare == board.enPassantSquare)
+                {
+                    moveList.add(encodeMove(sourceSquare, targetSquare, EN_PASSANT));
+                }
+                
+                else if(targetSquare >= 56) 
+                { 
+                    moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_QUEEN_CAPTURE));
+                    moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_ROOK_CAPTURE));
+                    moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_BISHOP_CAPTURE));
+                    moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_KNIGHT_CAPTURE));
+                } 
+
+                else 
+                {
+                    moveList.add(encodeMove(sourceSquare, targetSquare, CAPTURE));
+                }
+
+                attacks &= (attacks - 1);
+            }
+            
+            attackers &= (attackers - 1);
+        }
+    } 
+
+    else 
+    {
+        u64 pawns{board.getPieceBitboard(BLACK, PAWN)};
+        
+        //1. Single Pushes (Shift Down 8 squares, must be empty)
+        u64 singlePushes{(pawns >> 8) & ~globalOccupancy};
+        u64 pushes{singlePushes};
+        
+        while(pushes) 
+        {
+            int targetSquare{get_lsb(pushes)};
+            int sourceSquare{targetSquare + 8};
+            
+            // If it reaches Rank 1 (squares 0-7), it's a promotion
+            if(targetSquare <= 7) 
+            {
+                moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_QUEEN));
+                moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_ROOK));
+                moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_BISHOP));
+                moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_KNIGHT));
+            } 
+
+            else 
+            {
+                moveList.add(encodeMove(sourceSquare, targetSquare, QUIET));
+            }
+
+            pushes &= (pushes - 1);
+        }
+        
+        // 2. Double Pushes 
+        // Single pushes onto Rank 6 (0x0000FF0000000000ULL), shifted down 8 MORE squares, must be empty
+        u64 doublePushes{((singlePushes & 0x0000FF0000000000ULL) >> 8) & ~globalOccupancy};
+        
+        while(doublePushes) 
+        {
+            int targetSquare{get_lsb(doublePushes)};
+            int sourceSquare{targetSquare + 16};
+            moveList.add(encodeMove(sourceSquare, targetSquare, DOUBLE_PUSH));
+            doublePushes &= (doublePushes - 1);
+        }
+        
+        // 3. Pawn Attacks (Diagonal captures)
+        u64 attackers{pawns};
+
+        while(attackers) 
+        {
+            int sourceSquare{get_lsb(attackers)};
+            u64 attacks{getPawnAttacks(BLACK, sourceSquare) & enemyOccupancy};
+            
+            while(attacks) 
+            {
+                int targetSquare{get_lsb(attacks)};
+                
+                if (targetSquare <= 7) 
+                { 
+                    moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_QUEEN_CAPTURE));
+                    moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_ROOK_CAPTURE));
+                    moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_BISHOP_CAPTURE));
+                    moveList.add(encodeMove(sourceSquare, targetSquare, PROMOTE_KNIGHT_CAPTURE));
+                } 
+
+                else 
+                {
+                    moveList.add(encodeMove(sourceSquare, targetSquare, CAPTURE));
+                }
+                attacks &= (attacks - 1);
+            }
+
+            attackers &= (attackers - 1);
+        }
+    }
+    
     //1.KNIGHTS
     u64 knights{board.getPieceBitboard(side, KNIGHT)};
 

@@ -14,6 +14,14 @@ enum Piece
     PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
 };
 
+enum CastlingRights 
+{
+    WK = (1 << 0), // White Kingside  (0001)
+    WQ = (1 << 1), // White Queenside (0010)
+    BK = (1 << 2), // Black Kingside  (0100)
+    BQ = (1 << 3)  // Black Queenside (1000)
+};
+
 class Board
 {
     private:
@@ -30,11 +38,14 @@ class Board
 
     public:
     
+    int enPassantSquare; 
+    int castlingRights;
+    
     Board();
     void setPiece(int color, int piece, int square);
     void initStartingPosition();
     void print() const;
-    
+
     void updateOccupancies(); 
     inline u64 getPieceBitboard(int color, int piece) const {return bitboards[color][piece];}
     inline u64 getOccupancy(int color) const {return occupancies[color];}
