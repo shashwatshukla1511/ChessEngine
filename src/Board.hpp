@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <iostream>
 
+using u16 = uint16_t;
 using u64 = uint64_t;
 
 enum Color 
@@ -38,9 +39,10 @@ class Board
 
     public:
     
+    void makeMove(u16 move);
     int enPassantSquare; 
     int castlingRights;
-    
+
     Board();
     void setPiece(int color, int piece, int square);
     void initStartingPosition();
